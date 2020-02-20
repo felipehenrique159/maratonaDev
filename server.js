@@ -12,6 +12,10 @@ nunjucks.configure("./", {
 })
 
 
+//body on form
+server.use(express.urlencoded({ extended: true }))
+
+
 //list donors
 const donors = [
     {
@@ -37,10 +41,24 @@ const donors = [
 ]
 
 server.get("/", function (req, res) {
-    return res.render("index.html",{donors}) //render index.html
+    return res.render("index.html", { donors }) //render index.html
 })
 
+server.post("/", function (req, res) {
+    const name = req.body.name
+    //const email = req.body.email
+    const blood = req.body.blood
 
+    donors.push({  // push values inside array
+        name:name,
+        blood:blood,
+       // email:email
+    
+    })
+
+    return res.redirect("/")
+
+})
 
 
 //route port server
