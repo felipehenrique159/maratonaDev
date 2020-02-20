@@ -16,47 +16,65 @@ nunjucks.configure("./", {
 server.use(express.urlencoded({ extended: true }))
 
 
-//list donors
-const donors = [
-    {
-        name: "Diego Fernandes",
-        blood: "AB+"
-    },
+//config database conection
+const Pool = require("pg").Pool
+const db = new Pool({
+    user: "postgres",
+    password: "cidade123",
+    host: "localhost",
+    port: 5432,
+    database: "doe"
+})
 
-    {
-        name: "Felipe Henrique",
-        blood: "A+"
-    },
 
-    {
-        name: "Izabelle Costa",
-        blood: "AB+"
-    },
 
-    {
-        name: "Diego Fernandes",
-        blood: "AB+"
-    },
-
-]
 
 server.get("/", function (req, res) {
-    return res.render("index.html", { donors }) //render index.html
+    db.query('select * from donors', function (err, result) {
+        if (err) {
+            return res.send(err)
+        }
+        else {
+            const donors = result.rows
+            return res.render("index.html", { donors }) //render index.html
+        }
+    })
+
+
 })
 
 server.post("/", function (req, res) {
     const name = req.body.name
-    //const email = req.body.email
+    const email = req.body.email
     const blood = req.body.blood
 
-    donors.push({  // push values inside array
-        name:name,
-        blood:blood,
-       // email:email
-    
-    })
+    if (name == "" || email == "" || blood == "") {
+        return res.send("Todos os campos são obrigatorios")
+    }
 
-    return res.redirect("/")
+    else {
+
+        const query = `insert into donors("name","email","blood") values ($1,$2,$3)`;
+
+
+        const values = [name, email, blood]
+
+        db.query(query, values, function (err) {
+            if (err) {
+                return res.send(err)
+            }
+
+            else {
+                return res.redirect("/")
+            }
+        })
+
+
+
+    }
+
+    // push values inside database
+
 
 })
 
